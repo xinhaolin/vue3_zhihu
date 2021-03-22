@@ -1,8 +1,9 @@
 <template>
   <div class="container">
     <global-header :user="currentUser"></global-header>
+    <router-view></router-view>
     <column-list v-if="false" :list="list"></column-list>
-    <validate-form @form-submit="onFormSubmit" >
+    <validate-form v-if="false" @form-submit="onFormSubmit" ref="formRef" >
       <div class="mb-3">
         <label for="exampleInputEmail1" class="form-label">Email address</label>
         <validate-input
@@ -27,18 +28,29 @@
         <span class="btn btn-danger" >submit</span>
       </template>
     </validate-form>
+    <footer class="text-center py-4 text-secondary bg-light mt-6" >
+      <small>
+        <ul class=" list-inline mb-0" >
+          <li class=" list-inline-item" >2020者也专栏</li>
+          <li class=" list-inline-item" >课程</li>
+          <li class=" list-inline-item" >文档</li>
+          <li class=" list-inline-item" >联系</li>
+          <li class=" list-inline-item" >更多</li>
+        </ul>
+      </small>
+    </footer>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue'
+import { defineComponent, reactive, ref, onMounted } from 'vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import ColumnList, { ColumnProps } from './components/ColumnList.vue'
 import GlobalHeader, { UserProps } from './components/GlobalHeader.vue'
 import ValidateInput, { RulesProp } from './components/ValidateInput.vue'
 import ValidateForm from './components/ValidateForm.vue'
 const currentUser: UserProps = {
-  isLogin: true,
+  isLogin: false,
   name: 'xinhaolin'
 }
 const testData: ColumnProps[] = [
@@ -76,20 +88,24 @@ export default defineComponent({
     ValidateForm
   },
   setup () {
-    const emailVal = ref('wahahaha')
+    const emailVal = ref('123@test.com')
     const emailRules: RulesProp = [
       { type: 'required', message: '电子邮箱地址不能为空' },
       { type: 'email', message: '请输入正确的电子邮箱格式' }
     ]
-    const passwordVal = ref('')
+    const passwordVal = ref('123')
     const passwordRules: RulesProp = [
       { type: 'required', message: '密码不能为空' }
     ]
     const inputRef = ref<any>(null)
+    const formRef = ref<any>(null)
     const onFormSubmit = (vaild:boolean) => {
       console.log('inputRef', inputRef.value.validateInput())
       console.log('结果', vaild)
     }
+    onMounted(() => {
+      formRef.value.cleanForm()
+    })
     return {
       list: testData,
       currentUser,
@@ -98,7 +114,8 @@ export default defineComponent({
       passwordVal,
       passwordRules,
       onFormSubmit,
-      inputRef
+      inputRef,
+      formRef
     }
   }
 })

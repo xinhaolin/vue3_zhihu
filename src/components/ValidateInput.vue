@@ -12,7 +12,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, PropType } from 'vue'
+import { defineComponent, reactive, PropType, onMounted } from 'vue'
+import { emitter } from './ValidateForm.vue'
 const emailReg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
 interface RuleProp {
   type: 'required' | 'email',
@@ -57,6 +58,14 @@ export default defineComponent({
       inputRef.val = targetValue
       context.emit('update:modelValue', targetValue)
     }
+    const cleanInput = () => {
+      inputRef.val = ''
+      context.emit('update:modelValue', '')
+    }
+    onMounted(() => {
+      emitter.emit('form-item-created', validateInput)
+      emitter.emit('form-item-clean', cleanInput)
+    })
     return {
       inputRef,
       validateInput,
