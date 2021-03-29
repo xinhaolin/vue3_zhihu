@@ -25,8 +25,9 @@ import { defineComponent, reactive, PropType, onMounted } from 'vue'
 import { emitter } from './ValidateForm.vue'
 const emailReg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
 interface RuleProp {
-  type: 'required' | 'email',
-  message: string
+  type: 'required' | 'email' | 'custom',
+  message: string,
+  validator?: () => boolean;
 }
 export type RulesProp = RuleProp[]
 export type TagType = 'input' | 'textarea'
@@ -41,12 +42,12 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    console.log(context.attrs)
     const inputRef = reactive({
       val: props.modelValue || '',
       error: false,
       message: ''
     })
+    console.log('props', inputRef.val)
     const validateInput = () => {
       if (props.rules) {
         const allPassed = props.rules.every(rule => {
@@ -58,6 +59,9 @@ export default defineComponent({
               break
             case 'email':
               passed = emailReg.test(inputRef.val)
+              break
+            case 'custom':
+              passed = rule.validator ? rule.validator() : true
               break
           }
           return passed
@@ -77,6 +81,7 @@ export default defineComponent({
       context.emit('update:modelValue', '')
     }
     onMounted(() => {
+      console.log('props.modelValue', props.modelValue)
       emitter.emit('form-item-created', validateInput)
       emitter.emit('form-item-clean', cleanInput)
     })

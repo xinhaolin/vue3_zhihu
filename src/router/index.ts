@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import ColumnDetail from '../views/ColumnDetail.vue'
 import Create from '../views/CreatePost.vue'
+import Signup from '../views/Signup.vue'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -17,6 +18,12 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login,
+      meta: { redirectAlreadyLogin: true }
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: Signup,
       meta: { redirectAlreadyLogin: true }
     },
     {
