@@ -1,7 +1,7 @@
 <template>
   <div class="create-post-page">
     <h4>{{isEditMode ? '编辑文章' : '新建文章'}}</h4>
-    <!-- <uploader
+    <uploader
       action="/upload"
       :beforeUpload="uploadCheck"
       @file-uploaded="handleFileUploaded"
@@ -23,7 +23,7 @@
           <h3>点击重新上传</h3>
         </div>
       </template>
-    </uploader> -->
+    </uploader>
     <validate-form @form-submit="onFormSubmit">
       <div class="mb-3">
         <label class="form-label">文章标题：</label>
@@ -55,22 +55,28 @@
 import { defineComponent, ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
-import { GlobalDataProps, PostProps } from '../store/index'
+import { GlobalDataProps, PostProps, ResponseType, ImageProps } from '../store/index'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
+import Uploader from '../components/Uploader.vue'
+import createMessage from '../components/createMessage'
+import { beforeUploadCheck } from '../helper'
 
 export default defineComponent({
   name: 'Login',
   components: {
     ValidateInput,
-    ValidateForm
+    ValidateForm,
+    Uploader
   },
   setup () {
+    const uploadedData = ref()
     const titleVal = ref('')
     const route = useRoute()
     const router = useRouter()
     const store = useStore<GlobalDataProps>()
     const isEditMode = !!route.query.id
+    let imageId = ''
     const titleRules: RulesProp = [
       { type: 'required', message: '文章标题不能为空' }
     ]
@@ -90,7 +96,22 @@ export default defineComponent({
       //   })
       // }
     })
-
+    const uploadCheck = (file: File) => {
+      const result = beforeUploadCheck(file, { format: ['image/jpeg', 'image/png'], size: 1 })
+      const { passed, error } = result
+      if (error === 'format') {
+        createMessage('上传图片只能是 JPG/PNG 格式!', 'error')
+      }
+      if (error === 'size') {
+        createMessage('上传图片大小不能超过 1Mb', 'error')
+      }
+      return passed
+    }
+    const handleFileUploaded = (rawData: ResponseType<ImageProps>) => {
+      if (rawData.data._id) {
+        imageId = rawData.data._id
+      }
+    }
     const onFormSubmit = (result: boolean) => {
       console.log('提交！！', result)
       if (result) {
@@ -120,7 +141,10 @@ export default defineComponent({
       contentVal,
       contentRules,
       onFormSubmit,
-      isEditMode
+      isEditMode,
+      uploadCheck,
+      handleFileUploaded,
+      uploadedData
     }
   }
 })
